@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>exec</title>
+	</head>
+	<body>
+		<div style="width: 100%; text-align: center">
+			<span id="current" style="font-size: 80vh"></span>
+			<span id="raw"></span>
+			<br>
+			<span id="ascii"></span>
+		</div>
+		<script charset="utf-8">
+			const getCookieValue = name => document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+			const current = document.getElementById("current")
+			const raw = document.getElementById("raw")
+			const ascii = document.getElementById("ascii")
+			const code = getCookieValue("code")
+			const ptr = +getCookieValue("ptr")
+			let addr = +document.location.pathname.substring(1)
+
+			const cell = new Uint8Array(1)
+			cell[0] = +getCookieValue("cell")
+
+			if (ptr >= code.length) {
+				alert("finished")
+				out = JSON.parse(getCookieValue("out"))
+				current.style.display = "none"
+				raw.innerText = out.join(", ")
+				ascii.innerText = out.map(x => String.fromCharCode(x)).join("")
+				throw new Error("byeee")
+			}
+
+			const lnext = () => {
+				let parity = 0
+				for (let i = ptr + 1; i < code.length; i++) {
+					if (parity == 0 && code[i] == ']') return i
+					else if (code[i] == ']') parity--
+					else if (code[i] == '[') parity++
+				}
+				alert("invalid code")
+				throw new Error("invalid code")
+			}
+
+			const lprev = () => {
+				let parity = 0
+				for (let i = ptr - 1; i >= 0; i--) {
+					if (parity == 0 && code[i] == '[') return i
+					else if (code[i] == '[') parity--
+					else if (code[i] == ']') parity++
+				}
+				alert("invalid code")
+				throw new Error("invalid code")
+			}
+
+			const exec = code[ptr]
+			current.innerText = exec;
+			switch(exec) {
+				case '>':
+					document.cookie = `ptr=${ptr+1}`
+					addr++
+					break
+				case '<':
+					document.cookie = `ptr=${ptr+1}`
+					addr--
+					break
+				case '+':
+					document.cookie = `ptr=${ptr+1}`
+					cell[0] += 1
+					document.cookie = `cell=${cell[0]}; path=/${addr}`
+					break
+				case '-':
+					document.cookie = `ptr=${ptr+1}`
+					cell[0] -= 1
+					document.cookie = `cell=${cell[0]}; path=/${addr}`
+					break
+				case '.':
+					document.cookie = `ptr=${ptr+1}`
+					const out = JSON.parse(getCookieValue("out"))
+					out.push(cell[0])
+					document.cookie = `out=${JSON.stringify(out)}; path=/`
+					break
+				case ',':
+					document.cookie = `ptr=${ptr+1}`
+					// TODO
+					const inp = "42"
+					document.cookie = `cell=${inp}; path=/${addr}`
+					break
+				case '[':
+					document.cookie = `ptr=${cell[0] == 0 ? lnext() + 1 : ptr + 1}`
+					break
+				case ']':
+					document.cookie = `ptr=${cell[0] != 0 ? lprev() + 1 : ptr + 1}`
+					break
+				default:
+					alert("invalid code")
+					throw new Error("invalid code")
+			}
+
+			window.location.replace(`/${addr}`)
+		</script>
+	</body>
+</html>

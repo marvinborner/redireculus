@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>input</title>
+	</head>
+	<body>
+		<input type="text" placeholder="your program" value="++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." id="input" />
+		<input type="number" value="300" id="timeout" />
+		<input type="button" value="go" id="button" />
+		<script charset="utf-8">
+			const but = document.getElementById("button")
+			const inp = document.getElementById("input")
+			but.addEventListener("click", () => {
+				const timeout = +document.getElementById("timeout").value
+				// JS cookie assignment be weird af
+				document.cookie = `code=${inp.value}; max-age=${timeout}; path=/`
+				document.cookie = `ptr=0; max-age=${timeout}; path=/`
+				document.cookie = `out=[]; max-age=${timeout}; path=/`
+				window.location.replace("/0")
+			})
+		</script>
+	</body>
+</html>
